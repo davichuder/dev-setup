@@ -9,9 +9,6 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-# Trust the project's mise configs (required once per machine)
-mise trust . >/dev/null 2>&1 || true
-
 # --- 1) Native Windows must not proceed: use WSL2 ---------------------------
 uname_s="$(uname -s 2>/dev/null || true)"
 case "$uname_s" in
@@ -22,6 +19,33 @@ case "$uname_s" in
     exit 1
     ;;
 esac
+
+command -v git >/dev/null 2>&1 || {
+  echo "ERROR: git is missing." >&2
+  echo "       Install it first (Ubuntu/WSL: sudo apt install -y git, Bazzite: host image provides it)." >&2
+  exit 1
+}
+
+# --- 2) mise itself: the one binary this script needs before anything else ---
+if ! command -v mise >/dev/null 2>&1; then
+  if ! command -v curl >/dev/null 2>&1; then
+    if command -v apt-get >/dev/null 2>&1; then
+      sudo apt-get update && sudo apt-get install -y curl
+    elif command -v dnf >/dev/null 2>&1; then
+      sudo dnf install -y curl
+    else
+      echo "ERROR: mise and curl are both missing and no package manager was found for curl." >&2
+      echo "       Install mise manually: https://mise.jdx.dev/installing-mise.html" >&2
+      exit 1
+    fi
+  fi
+  echo "mise not found — installing..."
+  curl -fsSL https://mise.jdx.dev/install.sh | sh
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# Trust the project's mise configs (required once per machine)
+mise trust . >/dev/null 2>&1 || true
 
 # --- 2) argument parsing ----------------------------------------------------
 FORCE_MODULE=""

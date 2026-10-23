@@ -92,6 +92,16 @@ lazydocker = "latest"
 [bootstrap.mise_shell_activate]
 zsh = true
 
+# Make the brew-installed zsh the login shell (packages run first, then chsh)
+[bootstrap.user]
+login_shell = "zsh"
+
+# Key documented mise-getcha: the activation blocks call `mise` by name, so a
+# mise.run install in ~/.local/bin needs PATH set in ~/.zshenv (zsh reads it first).
+# mise bootstrap applies [dotfiles] BEFORE shell activation, so one run does both.
+[dotfiles]
+"~/.zshenv/mise-local-bin" = { line = 'export PATH="$HOME/.local/bin:$PATH"' }
+
 # Run idempotently on every bootstrap: the 6 core Nerd Fonts
 [tasks.bootstrap]
 run = "bash scripts/install-fonts.sh"
