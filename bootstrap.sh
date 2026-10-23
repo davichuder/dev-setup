@@ -5,6 +5,9 @@
 #   --dotfiles / --no-dotfiles  force the dotfiles step on or off (any order)
 #   --zsh / --no-zsh            force the "zsh as login shell" answer
 #   --doctor                    verify the installation; changes nothing
+#   --prune                     delete tool versions no config uses anymore
+#   --uninstall                 remove what this repository installed (asks y/n)
+#   --yes                       skip the --uninstall confirmation prompt
 #
 # Fully automatic example:
 #   ./bootstrap.sh --no-dotfiles
@@ -16,6 +19,9 @@ FORCE_MODULE=""
 DOT_MODE=""    # "", "yes", "no"
 ZSH_MODE=""    # "", "yes", "no"
 DOCTOR=0
+PRUNE=0
+UNINSTALL=0
+YES=0
 for arg in "$@"; do
   case "$arg" in
     desktop|wsl|bazzite|server) FORCE_MODULE="$arg" ;;
@@ -24,9 +30,21 @@ for arg in "$@"; do
     --zsh) ZSH_MODE="yes" ;;
     --no-zsh) ZSH_MODE="no" ;;
     --doctor) DOCTOR=1 ;;
-    *) echo "Unknown argument: $arg (use a module name, --dotfiles/--no-dotfiles, --zsh/--no-zsh, --doctor)" >&2 && exit 1 ;;
+    --prune) PRUNE=1 ;;
+    --uninstall) UNINSTALL=1 ;;
+    --yes) YES=1 ;;
+    *) echo "Unknown argument: $arg (use a module name, --dotfiles/--no-dotfiles, --zsh/--no-zsh, --doctor, --prune, --uninstall [--yes])" >&2 && exit 1 ;;
   esac
 done
+
+if [ "$DOCTOR" = 1 ] && { [ "$UNINSTALL" = 1 ] || [ "$PRUNE" = 1 ]; }; then
+  echo "ERROR: --doctor is read-only; it cannot be combined with --uninstall or --prune." >&2
+  exit 1
+fi
+if [ "$UNINSTALL" = 1 ] && [ "$PRUNE" = 1 ]; then
+  echo "ERROR: pick one: --uninstall removes everything, --prune only deletes unused tool versions." >&2
+  exit 1
+fi
 
 # --- 1) Native Windows must not proceed: use WSL2 ---------------------------
 uname_s="$(uname -s 2>/dev/null || true)"
@@ -38,6 +56,21 @@ case "$uname_s" in
     exit 1
     ;;
 esac
+
+# --- prune: delete tool versions that no config selects anymore -------------
+# `mise bootstrap` never removes anything: when a tool leaves [tools] (or a
+# "latest" range moves on), its old install stays on disk. `mise prune` is the
+# explicit cleanup, and it keeps anything a loaded config still selects.
+if [ "$PRUNE" = 1 ]; then
+  command -v mise >/dev/null 2>&1 || { echo "ERROR: mise is not installed; nothing to prune." >&2; exit 1; }
+  echo "==> tool versions no config uses anymore:"
+  mise ls --prunable 2>/dev/null | sed 's/^/    /' || true
+  echo "==> pruning"
+  mise -q prune --tools --yes
+  mise reshim >/dev/null 2>&1 || true
+  echo "==> done (tool versions selected by a config are kept)"
+  exit 0
+fi
 
 # Auto-detect which machine module applies. Prints ONLY the module name to
 # stdout; fails (returns 1) on any unsupported OS.
@@ -80,6 +113,186 @@ else
     exit 1
   fi
   echo "==> detected module: $MODULE"
+fi
+
+# --- uninstall: remove what this repository installed ------------------------
+# mise bootstrap has no general "undo": `mise bootstrap unapply <ENV>` only
+# works for named environments (mise.<env>.toml), and the base config is not
+# one. So the removal is explicit here, in reverse order of installation:
+# dotfile lines -> shell activation -> login shell -> global fragment -> tools
+# -> brew formulae -> fonts. The login shell goes before brew:zsh disappears,
+# or the next login would point at a deleted binary. System packages, the
+# ~/dotfiles checkout and mise itself are reported, never touched. Every step
+# tolerates "already gone", so running it twice ends in the same state.
+remove_managed_block() {
+  local file="$1" tag="$2" tmp
+  [ -f "$file" ] || return 0
+  grep -q "^# >>> $tag >>>" "$file" || return 0
+  tmp="$(mktemp)"
+  awk -v tag="$tag" '
+    index($0, "# >>> " tag " >>>") == 1 { inside = 1; next }
+    inside && index($0, "# <<< " tag " <<<") == 1 { inside = 0; next }
+    !inside { print }
+  ' "$file" > "$tmp"
+  cat "$tmp" > "$file"
+  rm -f "$tmp"
+  echo "    removed shell activation block from $file"
+}
+
+run_uninstall() {
+  local module="$1" answer tool formula brew_prefix brew_bin out
+  local tools apt_pkgs cur_shell removed_fonts=0
+
+  echo "==> uninstall (module: $module)"
+  if [ "$YES" != 1 ]; then
+    if [ ! -t 0 ]; then
+      echo "ERROR: --uninstall asks for confirmation; re-run with --yes for a non-interactive removal." >&2
+      exit 1
+    fi
+    read -r -p "Remove the tools, brew formulae, shell edits, fonts and global fragment this repo installed? (y/n): " answer
+    case "${answer,,}" in
+      y|yes) ;;
+      *) echo "cancelled; nothing was changed."; exit 0 ;;
+    esac
+  fi
+
+  # 1) PATH and shell-hook lines declared in [dotfiles]
+  if command -v mise >/dev/null 2>&1; then
+    echo "==> dotfile lines"
+    mise dot unapply --force --yes 2>&1 | sed 's/^/    /' || echo "    WARN: could not unapply dotfile lines"
+  else
+    echo "==> dotfile lines skipped (mise not found)"
+  fi
+
+  # 2) mise activation blocks written by mise bootstrap
+  echo "==> shell activation"
+  remove_managed_block "$HOME/.zshrc" "mise:activate"
+  remove_managed_block "$HOME/.zprofile" "mise:activate"
+
+  # 3) login shell FIRST, before brew:zsh is removed: a login shell pointing
+  # at a deleted zsh binary breaks the next login. Only touched when asked.
+  echo "==> login shell"
+  cur_shell="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7 || true)"
+  case "$cur_shell" in
+    */zsh)
+      if [ -t 0 ] && [ "$YES" != 1 ]; then
+        read -r -p "Change your login shell back to /bin/bash? (y/n): " answer
+      else
+        answer="n"
+      fi
+      case "${answer,,}" in
+        y|yes)
+          if chsh -s /bin/bash; then
+            echo "    login shell set to /bin/bash (applies to new logins)"
+          else
+            echo "    could not change the login shell; run: chsh -s /bin/bash"
+          fi
+          ;;
+        *) echo "    left as $cur_shell (revert later: chsh -s /bin/bash)" ;;
+      esac
+      ;;
+    "") echo "    could not read the login shell" ;;
+    *) echo "    left as $cur_shell (not zsh)" ;;
+  esac
+
+  # 4) global tools fragment generated by this script
+  echo "==> global tools fragment"
+  if [ -f "$HOME/.config/mise/conf.d/dev-setup-tools.toml" ]; then
+    rm -f "$HOME/.config/mise/conf.d/dev-setup-tools.toml"
+    rmdir "$HOME/.config/mise/conf.d" 2>/dev/null || true
+    echo "    removed ~/.config/mise/conf.d/dev-setup-tools.toml"
+  fi
+
+  # 5) tool versions declared in [tools]
+  echo "==> mise tools"
+  if command -v mise >/dev/null 2>&1; then
+    tools="$(awk '/^\[tools\]/{f=1; next} f && /^\[/{exit} f && /^[[:space:]]*[^#[:space:]].*=/{print}' mise.toml |
+      sed -E 's/^[[:space:]]*"([^"]+)"[[:space:]]*=.*/\1/; s/^[[:space:]]*([A-Za-z0-9_.:-]+)[[:space:]]*=.*/\1/')"
+    while IFS= read -r tool; do
+      [ -n "$tool" ] || continue
+      out="$(mise uninstall --all "$tool" 2>&1)" || true
+      case "$out" in
+        *"no versions found"*) ;;   # not installed: nothing to report
+        *) echo "    removed $tool" ;;
+      esac
+    done <<< "$tools"
+    mise reshim >/dev/null 2>&1 || true
+  else
+    echo "    skipped (mise not found)"
+  fi
+
+  # 6) Homebrew formulae declared in [bootstrap.packages]
+  echo "==> brew formulae"
+  brew_prefix="${HOMEBREW_PREFIX:-/home/linuxbrew/.linuxbrew}"
+  if [ -x "$brew_prefix/bin/brew" ]; then
+    brew_bin="$brew_prefix/bin/brew"
+  else
+    brew_bin="$(command -v brew 2>/dev/null || true)"
+  fi
+  if [ -n "$brew_bin" ]; then
+    case "$cur_shell" in
+      *linuxbrew*)
+        echo "    WARN: your login shell is $cur_shell and the next step deletes it."
+        echo "          Fix it first: chsh -s /bin/bash"
+        ;;
+    esac
+    for formula in $(grep -hoE '"brew:[^"]+"' mise.toml "mise.$module.toml" 2>/dev/null |
+      sed -E 's/"brew:(.*)"/\1/' | sort -u); do
+      [ "$formula" = mise ] && continue
+      if "$brew_bin" uninstall --formula --ignore-dependencies "$formula" >/dev/null 2>&1; then
+        echo "    removed brew:$formula"
+      fi
+    done
+  else
+    echo "    skipped: no brew binary found in $brew_prefix/bin"
+  fi
+
+  # 7) Nerd Fonts and their marker
+  echo "==> fonts"
+  for font in JetBrainsMono FiraCode Iosevka Hack Meslo CascadiaCode; do
+    if [ -d "$HOME/.local/share/fonts/$font" ]; then
+      rm -rf "$HOME/.local/share/fonts/$font"
+      removed_fonts=$((removed_fonts + 1))
+    fi
+  done
+  rm -rf "$HOME/.local/share/fonts/.nerd-fonts-done"
+  command -v fc-cache >/dev/null 2>&1 && fc-cache -f >/dev/null 2>&1 || true
+  echo "    removed $removed_fonts of the 6 Nerd Font directories"
+
+  # 8) what stays, and the exact command to remove it
+  echo
+  echo "==> left in place (outside what this repo owns):"
+  apt_pkgs="$(grep -hoE '"apt:[^"]+"' mise.toml "mise.$module.toml" 2>/dev/null |
+    sed -E 's/"apt:(.*)"/\1/' | sort -u | paste -sd' ' -)"
+  if [ -n "$apt_pkgs" ]; then
+    echo "    apt packages: $apt_pkgs"
+    echo "      sudo apt-get remove -y -- $apt_pkgs"
+  fi
+  if grep -q "bootstrap.apt.sources" "mise.$module.toml" 2>/dev/null; then
+    echo "    apt sources added by the module:"
+    echo "      sudo rm -f /etc/apt/sources.list.d/mise-*.sources"
+  fi
+  case "$module" in
+    desktop|server)
+      echo "    services enabled by the module:"
+      echo "      sudo systemctl disable --now docker tailscaled"
+      ;;
+  esac
+  if [ "$module" = bazzite ]; then
+    echo "    ghostty is layered with rpm-ostree:"
+    echo "      sudo rpm-ostree uninstall ghostty && reboot"
+  fi
+  echo "    ~/dotfiles checkout (your files): delete it yourself if you no longer need it"
+  echo "    mise itself and its data:"
+  echo "      rm -f \"\$HOME/.local/bin/mise\""
+  echo "      rm -rf \"\$HOME/.local/share/mise\" \"\$HOME/.local/state/mise\" \"\$HOME/.cache/mise\""
+  echo
+  echo "Done. Open a new shell; this checkout can be deleted."
+}
+
+if [ "$UNINSTALL" = 1 ]; then
+  run_uninstall "$MODULE"
+  exit 0
 fi
 
 # --- 2) login shell: change it only when you say yes -------------------------

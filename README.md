@@ -19,6 +19,8 @@ The other two modes only change what their flags do; everything else is identica
                                # desktop | wsl | bazzite | server, --dotfiles, --no-dotfiles,
                                # --zsh, --no-zsh (make brew zsh the login shell)
 ./bootstrap.sh --doctor        # verify only: PASS/FAIL per check, changes nothing (exit 1 on FAIL)
+./bootstrap.sh --prune         # delete tool versions no config selects anymore (see below)
+./bootstrap.sh --uninstall     # remove what this repo installed (asks y/n; see below)
 ```
 
 Interactive runs ask two questions: **dotfiles now? (y/n)** — "y" opens a URL prompt, Enter keeps your default repo — and **make zsh the default login shell? (y/n)**; answering n keeps your current shell, and non-interactive runs never change it.
@@ -35,6 +37,24 @@ The module is auto-detected, in this order:
 Anything else prints a warning and cancels without changing anything.
 
 After it finishes: open a new shell (mise activation block is written into your shell startup files). Tools then resolve in any directory too — the script writes the base `[tools]` table into a global mise fragment (`~/.config/mise/conf.d/dev-setup-tools.toml`), because the project config alone only applies inside the checkout.
+
+## Removing it later (prune and uninstall)
+
+`mise bootstrap` is additive: it installs and edits, it never deletes. Two commands cover cleanup.
+
+**`./bootstrap.sh --prune`** — removes stale tool versions only. When a tool leaves `[tools]` or a `"latest"` range moves on, the old install stays on disk; `mise prune` deletes exactly the versions no config selects anymore (`mise ls --prunable` shows the list first) and keeps everything a config still uses. Nothing else on the machine is touched.
+
+**`./bootstrap.sh --uninstall`** — reverses the whole setup, in a safe order, asking for confirmation first:
+
+1. the `[dotfiles]` lines and PATH exports (`mise dot unapply --force`)
+2. the `mise:activate` blocks in `~/.zshrc` / `~/.zprofile`
+3. the login shell (asks before reverting to `/bin/bash`, and only when the current one is zsh — this runs *before* `brew:zsh` is removed, so no login is left pointing at a deleted shell)
+4. the global tools fragment (`~/.config/mise/conf.d/dev-setup-tools.toml`)
+5. every tool declared in `[tools]`
+6. every `brew:` formula declared in `[bootstrap.packages]` (`mise` itself is kept, it is the manager)
+7. the 6 Nerd Fonts and their marker
+
+It then lists what it deliberately leaves alone, with the exact command for each: apt packages (`sudo apt-get remove …`), Bazzite's rpm-ostree Ghostty layer, your `~/dotfiles` checkout, and mise plus its data directory. Every step tolerates "already gone", so running it twice is safe. `--uninstall --yes` skips the confirmation, and in that mode the login shell is left unchanged (the revert command is printed instead), matching how non-interactive installs never change it.
 
 ## Requirements
 
@@ -150,7 +170,7 @@ Saved answers live in mise's state directory, outside every config file — neve
 
 ## Key facts baked into the design
 
-- **mise, not brew, runs the installs.** Formulae land in the standard Homebrew prefix (`/home/linuxbrew/.linuxbrew`) with Homebrew-compatible receipts — おbrew stays compatible without being required.
+- **mise, not brew, runs the installs.** Formulae land in the standard Homebrew prefix (`/home/linuxbrew/.linuxbrew`) with Homebrew-compatible receipts — Homebrew stays compatible without being required to drive the setup.
 - **Ghostty** is not in Homebrew for Linux: it comes from the `mkasberg/ghostty-ubuntu` PPA (Ubuntu/WSL2) or the `scottames` COPR layered with `rpm-ostree` (Bazzite). Verified docs: ghostty.org/docs/install/binary.
 - **Per-OS divergence is a module, not an if/else**: undeclared managers are skipped on other platforms, so base + module never fight.
 - **Idempotent everywhere**: `mise bootstrap` skips already-matching state; fonts and random scripts guard themselves; safe to re-run.
@@ -164,6 +184,8 @@ mise -E bazzite bootstrap --dry-run  # preview what would change
 mise bootstrap packages upgrade      # upgrade brew/apt formulae to latest
 mise bootstrap --update              # refresh metadata + declared repos
 mise bootstrap unapply dotfiles      # remove what the dotfiles module deployed
+./bootstrap.sh --prune               # delete tool versions no config selects anymore
+./bootstrap.sh --uninstall           # remove the whole setup (asks y/n)
 ```
 
 ## First run notes
