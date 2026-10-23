@@ -4,29 +4,19 @@ Portable developer-machine bootstrap for **WSL2 Ubuntu, Ubuntu desktop, Ubuntu S
 
 ## Usage
 
-**One shot, fully automatic** — copy-paste on a clean Ubuntu / WSL2 distro (the only pre-requirements are `git` and `curl`):
+One line — clone, enter, run (interactive; it auto-detects your machine and asks y/n about dotfiles):
 
 ```sh
-sudo apt update \
-  && sudo apt install -y git curl \
-  && git clone https://github.com/davichuder/dev-setup.git ~/dev-setup \
-  && cd ~/dev-setup \
-  && ./bootstrap.sh --no-dotfiles
+git clone https://github.com/davichuder/dev-setup.git ~/dev-setup && cd ~/dev-setup && ./bootstrap.sh
 ```
 
-`--no-dotfiles` answers no to dotfiles automatically: module auto-detection, validation, packages, tools and fonts run without a single prompt.
-
-**Interactive:**
+The other two modes only change what their flags do; everything else is identical:
 
 ```sh
-./bootstrap.sh              # auto-detects the machine type, asks y/n about dotfiles;
-                            # "y" opens a URL prompt (Enter = default davichuder/dotfiles,
-                            #   or paste a repository URL of your own)
-./bootstrap.sh bazzite      # optional: force a module (desktop | wsl | bazzite | server)
-./bootstrap.sh --dotfiles   # auto-detect + apply dotfiles with the default repo URL
+./bootstrap.sh --no-dotfiles   # fully automatic: zero prompts (ideal for a clean WSL distro)
+./bootstrap.sh wsl --dotfiles  # force module + apply dotfiles; flags go in any order:
+                               # desktop | wsl | bazzite | server, --dotfiles, --no-dotfiles
 ```
-
-Flags work in any order and combine: `./bootstrap.sh wsl --dotfiles`.
 
 The module is auto-detected, in this order:
 
