@@ -33,6 +33,32 @@ After it finishes: open a new shell (mise activation block is written into your 
 - **WSL2 + Docker**: install Docker Desktop on Windows and enable *Settings > Resources > WSL Integration > this distro* — the script reminds you at the end only when the Docker engine is not reachable from the distro.
 - **Network**: required on first run (bottles, runtimes, apt sources, fonts).
 
+## Installation flow
+
+```mermaid
+flowchart TD
+    A["git clone https://github.com/davichuder/dev-setup"] --> B["./bootstrap.sh"]
+    B --> C{"native Windows?<br>(MINGW / MSYS / CYGWIN)"}
+    C -- "yes" --> X["refuse:<br>wsl --install -d Ubuntu<br>nothing changed"]
+    C -- "no" --> D{"module passed as arg?"}
+    D -- "yes" --> F
+    D -- "no" --> E{"auto-detect"}
+    E -- "WSL2 marker in /proc/version" --> F["module = wsl"]
+    E -- "ujust present / bazzite" --> F
+    E -- "Ubuntu + graphical session" --> F
+    E -- "Ubuntu headless" --> F
+    E -- "anything else" --> X2["warn + cancel,<br>nothing changed"]
+    F --> G["mise trust ."] --> H["mise -E <module> bootstrap<br>brew bottles · apt sources/packages<br>system services · all tools · fonts"]
+    H --> I{"apply dotfiles? (y/n)"}
+    I -- "y" --> J["mise -E <module>,dotfiles bootstrap<br>--only dotfiles,tools --prompt-vars<br>URL prompt: Enter = your default repo,<br>or paste another URL"]
+    I -- "n" --> K["skipped — run later with<br>./bootstrap.sh <module> --dotfiles"]
+    J --> L
+    K --> L{"WSL2 and docker engine unreachable?"}
+    L -- "yes" --> M["remind:<br>Docker Desktop → Resources → WSL Integration"]
+    L -- "no" --> N["open a new shell — done"]
+    M --> N
+```
+
 ## How it is divised
 
 | File | Contains |
@@ -48,6 +74,27 @@ After it finishes: open a new shell (mise activation block is written into your 
 | `scripts/install-ghostty-bazzite.sh` | COPR + `rpm-ostree` layering for Ghostty (idempotent) |
 
 ## Dotfiles — example structure and sync
+
+### How the dotfiles flow works inside mise
+
+```mermaid
+flowchart TD
+    subgraph CFG["mise.dotfiles.toml (machine module, OFF by default)"]
+        V["[vars.dotfiles_url]<br>default = davichuder/dotfiles.git<br>prompt = URL question"]
+        R["[bootstrap.repos]<br>'~/dotfiles' = url = '{{vars.dotfiles_url}}'<br>ref = main"]
+        E["[dotfiles]<br>~/.zshrc = ~/dotfiles/zsh/zshrc<br>~/.config/ghostty/config = ~/dotfiles/ghostty/config<br>(one entry per file)"]
+        V -. "the url renders this var" .-> R
+        R -. "the checkout supplies the link sources" .-> E
+    end
+    B["mise -E <module>,dotfiles bootstrap --only dotfiles,tools --prompt-vars"]
+    B --> P{"dotfiles_url already answered?"}
+    P -- "no" --> Q["URL prompt: Enter keeps the<br>default, paste another URL"]
+    Q --> S["answer saved in mise state dir<br>(vars.toml), outside every config,<br>never committed"]
+    P -- "yes (saved answer or default)" --> C1
+    S --> C1["part: repos<br>git clone --branch main <url> ~/dotfiles"]
+    C1 --> C2["part: dotfiles<br>link each entry into $HOME,<br>state that already matches is skipped"]
+    C2 --> C3["re-sync any machine later:<br>mise -E <module>,dotfiles bootstrap --update<br>(fast-forward the checkout, re-apply the rest)"]
+```
 
 The dotfiles repository (`davichuder/dotfiles` by default; any URL at the prompt) is just a Git checkout: `mise` clones it into `~/dotfiles` and links individual files with `[dotfiles]` entries. Example layout — one directory per app, plain files, nothing else needed:
 
