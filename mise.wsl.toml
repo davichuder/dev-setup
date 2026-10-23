@@ -13,6 +13,9 @@
 [bootstrap.apt.sources]
 ghostty = { ppa = "mkasberg/ghostty-ubuntu" }
 
+[bootstrap.hooks]
+final = "bash scripts/set-timezone-wsl.sh"
+
 [bootstrap.packages]
 "apt:ghostty" = "latest"
 "apt:unzip" = "latest"   # system unzip: fonts task needs it, /usr/bin is on PATH for tasks

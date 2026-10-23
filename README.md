@@ -99,7 +99,7 @@ flowchart TD
 |---|---|
 | `mise.toml` | Base for every machine: 5 runtimes + 39 CLIs (`[tools]`), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed; includes llama.cpp for local inference), bash and zsh shell activation, idempotent font task |
 | `mise.desktop.toml` | Ubuntu desktop: Ghostty (PPA), Docker Engine, Tailscale + services |
-| `mise.wsl.toml` | WSL2: Ghostty (PPA, WSLg); Docker comes from Docker Desktop on Windows |
+| `mise.wsl.toml` | WSL2: Ghostty (PPA, WSLg); Docker comes from Docker Desktop on Windows; time zone set to America/Argentina/Buenos Aires (UTC-3) |
 | `mise.bazzite.toml` | Bazzite: Ghostty via COPR + `rpm-ostree`; Docker/SSH already in the image |
 | `mise.server.toml` | Ubuntu Server: Docker Engine, Tailscale, `openssh-server` + services |
 | `mise.dotfiles.toml` | Optional module: clones `github.com/davichuder/dotfiles` into `~/dotfiles` and links files; only applied when you accept |
@@ -205,3 +205,4 @@ mise bootstrap unapply dotfiles      # remove what the dotfiles module deployed
 - WSL2 + Docker Desktop: enable **Settings > Resources > WSL Integration** for the distro (bootstrap.sh prints the reminder).
 - Bazzite: after the Ghostty layer, one reboot applies it.
 - `mise bootstrap` runs with `sudo` only where a change requires root (apt sources/packages, rpm-ostree); it never runs privileged work without a declared change.
+- WSL2 clock: the setup runs a `final` hook setting the distro timezone to `America/Argentina/Buenos_Aires` (UTC-3). WSL2 inherits a UTC clock from the Windows host, so this only converts display; if you want the host to follow it instead, set Windows' own timezone too. On a native Ubuntu install the zone stays untouched.
