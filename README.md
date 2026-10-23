@@ -4,12 +4,40 @@ Portable developer-machine bootstrap for **WSL2 Ubuntu, Ubuntu desktop, Ubuntu S
 
 ## Usage
 
+**One shot, fully automatic** — copy-paste on a clean Ubuntu / WSL2 distro (the only pre-requirements are `git` and `curl`):
+
 ```sh
-git clone <this-repo-url> dev-setup && cd dev-setup
-./bootstrap.sh                # auto-detects the machine type, asks about dotfiles
-./bootstrap.sh bazzite        # optional: force a module (desktop | wsl | bazzite | server)
-./bootstrap.sh wsl --dotfiles # apply dotfiles too, non-interactively
+sudo apt update \
+  && sudo apt install -y git curl \
+  && git clone https://github.com/davichuder/dev-setup.git ~/dev-setup \
+  && cd ~/dev-setup \
+  && ./bootstrap.sh --no-dotfiles
 ```
+
+`--no-dotfiles` answers no to dotfiles automatically: module auto-detection, validation, packages, tools and fonts run without a single prompt.
+
+**Interactive:**
+
+```sh
+./bootstrap.sh              # auto-detects the machine type, asks y/n about dotfiles;
+                            # "y" opens a URL prompt (Enter = default davichuder/dotfiles,
+                            #   or paste a repository URL of your own)
+./bootstrap.sh bazzite      # optional: force a module (desktop | wsl | bazzite | server)
+./bootstrap.sh --dotfiles   # auto-detect + apply dotfiles with the default repo URL
+```
+
+Flags work in any order and combine: `./bootstrap.sh wsl --dotfiles`.
+
+The module is auto-detected, in this order:
+
+1. `/proc/version` mentions Microsoft → **wsl**
+2. a Fedora Atomic image with `ujust` (`ujust` in PATH or "bazzite" in os-release) → **bazzite**
+3. Ubuntu with a graphical session (`$XDG_SESSION_TYPE` x11/wayland, or `graphical.target` active) → **desktop**
+4. Ubuntu headless (tty/ssh session) → **server**
+
+Anything else prints a warning and cancels without changing anything.
+
+After it finishes: open a new shell (mise activation block is written into your shell startup files).
 
 The module is auto-detected, in this order:
 

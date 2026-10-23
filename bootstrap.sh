@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # One-shot machine bootstrap. Run from a checkout of this repository:
-#   ./bootstrap.sh          — auto-detects machine type, asks about dotfiles
-#   ./bootstrap.sh bazzite  — force a module: desktop | wsl | bazzite | server
+#   ./bootstrap.sh              auto-detect machine type, ask about dotfiles
+#   ./bootstrap.sh <module>     force a module: desktop | wsl | bazzite | server
+#   --dotfiles / --no-dotfiles  force the dotfiles step on or off (any order)
+#
+# Fully automatic example:
+#   ./bootstrap.sh --no-dotfiles
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
@@ -19,8 +23,17 @@ case "$uname_s" in
     ;;
 esac
 
-# --- 2) module selection ----------------------------------------------------
-MODULE="${1:-}"
+# --- 2) argument parsing ----------------------------------------------------
+FORCE_MODULE=""
+DOT_MODE=""    # "", "yes", "no"
+for arg in "$@"; do
+  case "$arg" in
+    desktop|wsl|bazzite|server) FORCE_MODULE="$arg" ;;
+    --dotfiles) DOT_MODE="yes" ;;
+    --no-dotfiles) DOT_MODE="no" ;;
+    *) echo "Unknown argument: $arg (use a module name, --dotfiles or --no-dotfiles)" >&2 && exit 1 ;;
+  esac
+done
 
 # Auto-detect which machine module applies. Prints ONLY the module name to
 # stdout; fails (returns 1) on any unsupported OS.
@@ -51,11 +64,8 @@ detect_module() {
   return 1
 }
 
+MODULE="$FORCE_MODULE"
 if [ -n "$MODULE" ]; then
-  case "$MODULE" in
-    desktop|wsl|bazzite|server) ;;
-    *) echo "Unknown module: $MODULE"; exit 1 ;;
-  esac
   echo "==> module forced from argument: $MODULE"
 else
   if ! MODULE="$(detect_module)"; then
@@ -73,19 +83,35 @@ echo "==> mise bootstrap (module: $MODULE, dotfiles skipped)"
 mise -E "$MODULE" bootstrap --yes
 
 # --- 4) dotfiles: only if you say yes ---------------------------------------
-APPLY_DOTFILES="${2:-}"
-if [ "$APPLY_DOTFILES" = "--dotfiles" ]; then
-  ANSWER="y"
-elif [ -t 0 ]; then
-  read -r -p "Apply dotfiles? (y/n): " ANSWER
-else
-  ANSWER="n"
-fi
+# In non-interactive runs the default answer is "no"; with --dotfiles the
+# declared default repo URL is used without prompting (no --prompt-vars).
+case "$DOT_MODE" in
+  no)
+    ANSWER="n"
+    ;;
+  yes)
+    ANSWER="y"
+    ;;
+  "")
+    if [ -t 0 ]; then
+      read -r -p "Apply dotfiles? (y/n): " ANSWER
+    else
+      ANSWER="n"
+    fi
+    ;;
+esac
+
 case "${ANSWER,,}" in
   y|yes)
     echo "==> applying dotfiles"
-    echo "    (the URL prompt shows your default repo: press Enter for it, or paste another URL)"
-    mise -E "$MODULE,dotfiles" bootstrap --only dotfiles,tools --prompt-vars --yes
+    PROMPT_VARS=()
+    if [ -t 0 ]; then
+      PROMPT_VARS=(--prompt-vars)
+      echo "    (the URL prompt shows your default repo: press Enter for it, or paste another URL)"
+    else
+      echo "    (non-interactive: using the declared default repo URL; interactive run re-asks)"
+    fi
+    mise -E "$MODULE,dotfiles" bootstrap --only dotfiles,tools "${PROMPT_VARS[@]+"${PROMPT_VARS[@]}"}" --yes
     ;;
   *)
     echo "dotfiles skipped (run later: ./bootstrap.sh $MODULE --dotfiles)"
