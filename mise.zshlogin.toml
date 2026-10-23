@@ -1,0 +1,6 @@
+# Optional machine module: make the brew-installed zsh the login shell.
+# bootstrap.sh asks y/n and only adds this module when you answer yes, so
+# nothing ever changes your login shell without asking. Packages part runs
+# before the user part, so brew zsh exists when chsh runs.
+[bootstrap.user]
+login_shell = "zsh"

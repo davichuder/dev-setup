@@ -50,12 +50,15 @@ mise trust . >/dev/null 2>&1 || true
 # --- 2) argument parsing ----------------------------------------------------
 FORCE_MODULE=""
 DOT_MODE=""    # "", "yes", "no"
+ZSH_MODE=""    # "", "yes", "no"
 for arg in "$@"; do
   case "$arg" in
     desktop|wsl|bazzite|server) FORCE_MODULE="$arg" ;;
     --dotfiles) DOT_MODE="yes" ;;
     --no-dotfiles) DOT_MODE="no" ;;
-    *) echo "Unknown argument: $arg (use a module name, --dotfiles or --no-dotfiles)" >&2 && exit 1 ;;
+    --zsh) ZSH_MODE="yes" ;;
+    --no-zsh) ZSH_MODE="no" ;;
+    *) echo "Unknown argument: $arg (use a module name, --dotfiles/--no-dotfiles, --zsh/--no-zsh)" >&2 && exit 1 ;;
   esac
 done
 
@@ -102,9 +105,21 @@ else
   echo "==> detected module: $MODULE"
 fi
 
-# --- 3) main bootstrap (packages + tools + fonts, no dotfiles) ---------------
-echo "==> mise bootstrap (module: $MODULE, dotfiles skipped)"
-mise -E "$MODULE" bootstrap --yes
+# --- 3) login shell: change it only when you say yes -------------------------
+# mise.zshlogin.toml holds [bootstrap.user] login_shell; adding the module to
+# the env list is what applies it. Non-interactive runs never change the shell.
+case "$ZSH_MODE" in
+  "")  [ -t 0 ] && { read -r -p "Make zsh the default login shell? (y/n): " ZSH_ANSWER || ZSH_ANSWER=n; ZSH_MODE="${ZSH_ANSWER,,}"; } || ZSH_MODE="n" ;;
+esac
+
+case "$ZSH_MODE" in
+  y|yes) SHELL_ENV="$MODULE,zshlogin"; echo "==> zsh will become your login shell" ;;
+  *)     SHELL_ENV="$MODULE"; echo "==> keeping your current login shell" ;;
+esac
+
+# --- 4) main bootstrap (packages + tools + fonts, no dotfiles) ---------------
+echo "==> mise bootstrap (module: $SHELL_ENV, dotfiles skipped)"
+mise -E "$SHELL_ENV" bootstrap --yes
 
 # --- 4) dotfiles: only if you say yes ---------------------------------------
 # In non-interactive runs the default answer is "no"; with --dotfiles the

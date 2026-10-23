@@ -13,10 +13,14 @@ git clone https://github.com/davichuder/dev-setup.git ~/dev-setup && cd ~/dev-se
 The other two modes only change what their flags do; everything else is identical:
 
 ```sh
-./bootstrap.sh --no-dotfiles   # fully automatic: zero prompts (ideal for a clean WSL distro)
+./bootstrap.sh --no-dotfiles   # fully automatic: zero prompts (ideal for a clean WSL distro);
+                               # also leaves your login shell untouched
 ./bootstrap.sh wsl --dotfiles  # force module + apply dotfiles; flags go in any order:
-                               # desktop | wsl | bazzite | server, --dotfiles, --no-dotfiles
+                               # desktop | wsl | bazzite | server, --dotfiles, --no-dotfiles,
+                               # --zsh, --no-zsh (make brew zsh the login shell)
 ```
+
+Interactive runs ask two questions: **dotfiles now? (y/n)** — "y" opens a URL prompt, Enter keeps your default repo — and **make zsh the default login shell? (y/n)**; answering n keeps your current shell, and non-interactive runs never change it.
 
 The module is auto-detected, in this order:
 
