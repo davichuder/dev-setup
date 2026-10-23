@@ -18,9 +18,12 @@ The other two modes only change what their flags do; everything else is identica
 ./bootstrap.sh wsl --dotfiles  # force module + apply dotfiles; flags go in any order:
                                # desktop | wsl | bazzite | server, --dotfiles, --no-dotfiles,
                                # --zsh, --no-zsh (make brew zsh the login shell)
+./bootstrap.sh --doctor        # verify only: PASS/FAIL per check, changes nothing (exit 1 on FAIL)
 ```
 
 Interactive runs ask two questions: **dotfiles now? (y/n)** — "y" opens a URL prompt, Enter keeps your default repo — and **make zsh the default login shell? (y/n)**; answering n keeps your current shell, and non-interactive runs never change it.
+
+**Idempotent by design** — run it 10 times in a row and the final state is the same: mise skips packages and tools that already match, dotfile edits add only missing lines, and the font task short-circuits on its marker. The one variation over long periods is the "latest" version policy picking up upstream releases. Use `--doctor` to confirm the state any time; with `--zsh` it also verifies that the login shell really is zsh (and nothing else changed shell-related).
 
 The module is auto-detected, in this order:
 
