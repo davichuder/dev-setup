@@ -37,7 +37,9 @@ dua = "latest"
 # Data & markup
 jq = "latest"
 yq = "latest"
-duckdb = "latest"
+# pinned: aqua registry has no CLI asset for the 2.0.0 release yet;
+# revisit "latest" once aqua:duckdb/duckdb covers 2.x
+duckdb = "1.5.6"
 glow = "latest"
 
 # Monitoring & performance
