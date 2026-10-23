@@ -19,9 +19,11 @@ trap 'rm -rf "$TMP"' EXIT
 
 for FONT in JetBrainsMono FiraCode Iosevka Hack Meslo CascadiaCode; do
   echo "fonts: downloading $FONT"
-  curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT}.zip" \
-    -o "$TMP/${FONT}.zip"
-  unzip -q -o "$TMP/${FONT}.zip" -d "$DEST/$FONT"
+  # tar.xz instead of zip: tar exists everywhere, unzip is absent on clean distros
+  curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT}.tar.xz" \
+    -o "$TMP/${FONT}.tar.xz"
+  mkdir -p "$DEST/$FONT"
+  tar -xJf "$TMP/${FONT}.tar.xz" -C "$DEST/$FONT"
 done
 
 fc-cache -f >/dev/null 2>&1
