@@ -57,9 +57,8 @@ atuin = "latest"
 # Docs & help (tealdeer provides the tldr command)
 tealdeer = "latest"
 
-# Networking / HTTP (httpie python original, thefuck via pipx backend)
+# Networking / HTTP (httpie python original)
 "pypi:httpie" = "latest"
-"pypi:thefuck" = "latest"
 
 # Coding agents & ecosystem
 opencode = "latest"
@@ -88,6 +87,7 @@ lazydocker = "latest"
 "brew:rsync" = "latest"
 "brew:htop" = "latest"
 "brew:powerlevel10k" = "latest"
+"brew:thefuck" = "latest"   # pypi backend is broken on python 3.13 (distutils gone)
 
 # Activate mise in the login shell
 [bootstrap.mise_shell_activate]
@@ -96,8 +96,18 @@ zsh = true
 # Key documented mise-getcha: the activation blocks call `mise` by name, so a
 # mise.run install in ~/.local/bin needs PATH set in ~/.zshenv (zsh reads it first).
 # mise bootstrap applies [dotfiles] BEFORE shell activation, so one run does both.
+# These shell hooks are the difference between "binary installed" and "tool works":
+# zoxide/carapace/fzf/thefuck need init lines, powerlevel10k needs its theme source
+# (the brew prefix path is constant across every machine this repo provisions).
 [dotfiles]
 "~/.zshenv/mise-local-bin" = { line = 'export PATH="$HOME/.local/bin:$PATH"' }
+"~/.zshenv/brew-local-bin" = { line = 'export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"' }
+"~/.zshrc/powerlevel10k-theme" = { line = 'source "/home/linuxbrew/.linuxbrew/opt/powerlevel10k/share/powerlevel10k/powerlevel10k.zsh-theme"' }
+# fzf first, atuin last: both bind Ctrl-R; the later line wins, so history stays atuin
+"~/.zshrc/fzf-hook" = { line = 'source <(fzf --zsh)' }
+"~/.zshrc/zoxide-init" = { line = 'eval "$(zoxide init zsh)"' }
+"~/.zshrc/carapace-completions" = { line = 'autoload -Uz compinit; compinit -C; source <(carapace _carapace)' }
+"~/.zshrc/thefuck-alias" = { line = 'eval "$(thefuck --alias fuck)"' }
 "~/.zshrc/atuin-init" = { line = 'eval "$(atuin init zsh)"' }
 
 # Run idempotently on every bootstrap: the 6 core Nerd Fonts
