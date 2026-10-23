@@ -10,5 +10,10 @@
 # Ghostty is layered with rpm-ostree through the community COPR (never dnf on
 # atomic images). Needs one reboot to activate. The hook is idempotent.
 
+# Toolchain note: Bazzite does not ship build-essential by default, and installing
+# one with rpm-ostree needs a reboot. LazyVim + `nvim-treesitter` compile their
+# parsers against a C compiler, so set one up before customizing Neovim:
+#   ujust install-system-flatpaks   (or one-off: `toolbox create` + install
+#   gcc / pkgconf / openssl-devel inside the toolbx).
 [bootstrap.hooks]
 final = "bash scripts/install-ghostty-bazzite.sh"

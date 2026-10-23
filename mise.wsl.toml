@@ -16,3 +16,7 @@ ghostty = { ppa = "mkasberg/ghostty-ubuntu" }
 [bootstrap.packages]
 "apt:ghostty" = "latest"
 "apt:unzip" = "latest"   # system unzip: fonts task needs it, /usr/bin is on PATH for tasks
+# build toolchain: `cargo` linking, `node-gyp` and `nvim-treesitter` parser builds
+"apt:build-essential" = "latest"
+"apt:pkg-config" = "latest"
+"apt:libssl-dev" = "latest"

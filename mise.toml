@@ -54,6 +54,14 @@ carapace = "latest"
 navi = "latest"
 atuin = "latest"
 
+# Quality / policy for the shell scripts in this repo (and any other shell code)
+shellcheck = "latest"
+shfmt = "latest"
+
+# Used by `nvim-treesitter` when you later customize Neovim/LazyVim: the CLI
+# and a C compiler (the compiler comes from the apt toolchain below).
+"tree-sitter" = "latest"
+
 # Docs & help (tealdeer provides the tldr command)
 tealdeer = "latest"
 
@@ -91,6 +99,7 @@ lazydocker = "latest"
 
 # Activate mise in the login shell
 [bootstrap.mise_shell_activate]
+bash = true
 zsh = true
 
 # Key documented mise-getcha: the activation blocks call `mise` by name, so a

@@ -97,7 +97,7 @@ flowchart TD
 
 | File | Contains |
 |---|---|
-| `mise.toml` | Base for every machine: 5 runtimes + 35 CLIs (`[tools]`), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed), `zsh` login-shell activation, idempotent font task |
+| `mise.toml` | Base for every machine: 5 runtimes + 39 CLIs (`[tools]`, now including shellcheck, shfmt and the tree-sitter CLI for LazyVim), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed), bash and zsh shell activation, idempotent font task |
 | `mise.desktop.toml` | Ubuntu desktop: Ghostty (PPA), Docker Engine, Tailscale + services |
 | `mise.wsl.toml` | WSL2: Ghostty (PPA, WSLg); Docker comes from Docker Desktop on Windows |
 | `mise.bazzite.toml` | Bazzite: Ghostty via COPR + `rpm-ostree`; Docker/SSH already in the image |
@@ -175,6 +175,17 @@ Saved answers live in mise's state directory, outside every config file — neve
 - **Per-OS divergence is a module, not an if/else**: undeclared managers are skipped on other platforms, so base + module never fight.
 - **Idempotent everywhere**: `mise bootstrap` skips already-matching state; fonts and random scripts guard themselves; safe to re-run.
 - **Secrets never in git**: if a template ever needs one, use `[bootstrap.secrets]` (env-backed), never literal values.
+
+## Neovim / LazyVim (optional, already ready)
+
+No separate toolchain to install later — the setup lands the [LazyVim requirements](https://www.lazyvim.org/) up front:
+
+- `neovim >= 0.11.2` (with LuaJIT) and `lazygit` from Homebrew, `git >= 2.19` and `curl` from the apt/brew steps
+- `ripgrep`, `fd`, `fzf` as tools `[tools]`
+- `tree-sitter` CLI as a tool, plus a C compiler (`build-essential` on Ubuntu/Bazzite: `gcc`/`pkgconf` via rpm-ostree or toolbx) for `nvim-treesitter` parser builds
+- the 6 Nerd Fonts installed by `scripts/install-fonts.sh` (v3+) and Ghostty as the terminal on Ubuntu (documented on the Bazzite module as a manual step with `rpm-ostree`)
+
+You only need to drop your LazyVim config (`~/.config/nvim`) on top of it; `:LazyHealth` should then pass without installing anything extra.
 
 ## Everyday commands
 

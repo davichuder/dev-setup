@@ -14,6 +14,10 @@ tailscale = { uris = "https://pkgs.tailscale.com/stable/ubuntu", key = "https://
 "apt:tailscale" = "latest"
 "apt:unzip" = "latest"   # system unzip: fonts task needs it, /usr/bin is on PATH for tasks
 "apt:openssh-server" = "latest"
+# build toolchain: `cargo` linking, `node-gyp` and `nvim-treesitter` parser builds
+"apt:build-essential" = "latest"
+"apt:pkg-config" = "latest"
+"apt:libssl-dev" = "latest"
 
 [bootstrap.services.docker]
 state = "running"
