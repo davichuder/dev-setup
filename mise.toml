@@ -52,7 +52,6 @@ dive = "latest"
 zoxide = "latest"
 carapace = "latest"
 navi = "latest"
-starship = "latest"
 atuin = "latest"
 
 # Docs & help (tealdeer provides the tldr command)
