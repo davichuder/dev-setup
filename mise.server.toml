@@ -12,6 +12,7 @@ tailscale = { uris = "https://pkgs.tailscale.com/stable/ubuntu", key = "https://
 "apt:docker-ce-cli" = "latest"
 "apt:docker-compose-plugin" = "latest"
 "apt:tailscale" = "latest"
+"apt:unzip" = "latest"   # system unzip: fonts task needs it, /usr/bin is on PATH for tasks
 "apt:openssh-server" = "latest"
 
 [bootstrap.services.docker]

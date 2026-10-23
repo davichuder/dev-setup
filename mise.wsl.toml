@@ -15,3 +15,4 @@ ghostty = { ppa = "mkasberg/ghostty-ubuntu" }
 
 [bootstrap.packages]
 "apt:ghostty" = "latest"
+"apt:unzip" = "latest"   # system unzip: fonts task needs it, /usr/bin is on PATH for tasks
