@@ -97,7 +97,7 @@ flowchart TD
 
 | File | Contains |
 |---|---|
-| `mise.toml` | Base for every machine: 5 runtimes + 39 CLIs (`[tools]`, now including shellcheck, shfmt and the tree-sitter CLI for LazyVim), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed), bash and zsh shell activation, idempotent font task |
+| `mise.toml` | Base for every machine: 5 runtimes + 39 CLIs (`[tools]`), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed; includes llama.cpp for local inference), bash and zsh shell activation, idempotent font task |
 | `mise.desktop.toml` | Ubuntu desktop: Ghostty (PPA), Docker Engine, Tailscale + services |
 | `mise.wsl.toml` | WSL2: Ghostty (PPA, WSLg); Docker comes from Docker Desktop on Windows |
 | `mise.bazzite.toml` | Bazzite: Ghostty via COPR + `rpm-ostree`; Docker/SSH already in the image |
@@ -175,6 +175,7 @@ Saved answers live in mise's state directory, outside every config file — neve
 - **Per-OS divergence is a module, not an if/else**: undeclared managers are skipped on other platforms, so base + module never fight.
 - **Idempotent everywhere**: `mise bootstrap` skips already-matching state; fonts and random scripts guard themselves; safe to re-run.
 - **Secrets never in git**: if a template ever needs one, use `[bootstrap.secrets]` (env-backed), never literal values.
+- **Multiplexed work is herdr, not tmux/zellij**: one workspace per directory, tabs for editor / agent / terminal and remote SSH — no second multiplexer is installed; the build toolchain (gcc, pkg-config, openssl headers) comes from the apt packages rather than adding a separate toolchain image.
 
 ## Neovim / LazyVim (optional, already ready)
 

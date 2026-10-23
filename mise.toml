@@ -96,6 +96,7 @@ lazydocker = "latest"
 "brew:htop" = "latest"
 "brew:powerlevel10k" = "latest"
 "brew:thefuck" = "latest"   # pypi backend is broken on python 3.13 (distutils gone)
+"brew:llama.cpp" = "latest" # provides llama-cli/llama-server and the quantize helpers
 
 # Activate mise in the login shell
 [bootstrap.mise_shell_activate]
