@@ -1,0 +1,97 @@
+# dev-setup — base configuration
+# Applies to every machine (WSL2 Ubuntu, Ubuntu desktop, Ubuntu Server, Bazzite).
+# Per-OS extras live in mise.<env>.toml machine modules, selected with:
+#   mise -E <module> bootstrap
+# Module selection is handled by bootstrap.sh; run it on a new machine.
+# Version policy: lts where the project ships an LTS, otherwise latest.
+# Secrets are never stored here — use [bootstrap.secrets] if you need templates.
+
+[tools]
+# Language runtimes (mise core tools)
+node = "lts"
+go = "latest"
+python = "3.13"
+java = "lts"
+rust = "stable"
+
+# Language package managers / build entry points
+pnpm = "latest"
+uv = "latest"
+
+# Git & versioning
+gh = "latest"
+delta = "latest"
+difftastic = "latest"
+lazygit = "latest"
+
+# Files, search and text
+ripgrep = "latest"
+fd = "latest"
+fzf = "latest"
+eza = "latest"
+bat = "latest"
+sd = "latest"
+yazi = "latest"
+dua = "latest"
+
+# Data & markup
+jq = "latest"
+yq = "latest"
+duckdb = "latest"
+glow = "latest"
+
+# Monitoring & performance
+bottom = "latest"
+hyperfine = "latest"
+watchexec = "latest"
+dive = "latest"
+
+# Navigation, shell UX and completions
+zoxide = "latest"
+carapace = "latest"
+navi = "latest"
+starship = "latest"
+atuin = "latest"
+
+# Docs & help (tealdeer provides the tldr command)
+tealdeer = "latest"
+
+# Networking / HTTP (httpie python original, thefuck via pipx backend)
+"pypi:httpie" = "latest"
+"pypi:thefuck" = "latest"
+
+# Coding agents & ecosystem
+opencode = "latest"
+pi = "latest"
+"npm:gentle-pi" = "latest"   # gentle-shell; npm package name is gentle-pi until migration
+gentle-ai = "latest"
+lazyssh = "latest"
+lazyjournal = "latest"
+herdr = "latest"
+
+# Containers
+"github:docker/compose" = "latest"
+lazydocker = "latest"
+
+# Homebrew formulae installed WITHOUT needing Homebrew itself:
+# mise downloads bottles from ghcr.io into /home/linuxbrew/.linuxbrew and
+# writes Homebrew-compatible receipts (brew list works if brew is present).
+[bootstrap.packages]
+"brew:mise" = "latest"
+"brew:git" = "latest"
+"brew:zsh" = "latest"
+"brew:neovim" = "latest"
+"brew:wget" = "latest"
+"brew:zip" = "latest"
+"brew:unzip" = "latest"
+"brew:rsync" = "latest"
+"brew:htop" = "latest"
+"brew:powerlevel10k" = "latest"
+
+# Activate mise in the login shell
+[bootstrap.mise_shell_activate]
+zsh = true
+
+# Run idempotently on every bootstrap: the 6 core Nerd Fonts
+[tasks.bootstrap]
+run = "bash scripts/install-fonts.sh"

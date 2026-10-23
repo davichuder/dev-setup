@@ -1,0 +1,17 @@
+# Machine module: wsl (WSL2 Ubuntu with Windows host)
+# Select with: mise -E wsl bootstrap
+# Ghostty renders through WSLg.
+#
+# Docker is intentionally NOT installed here: the daemon comes from Docker
+# Desktop on Windows via WSL Integration. Remember to enable it:
+#   Docker Desktop > Settings > Resources > WSL Integration > enable this distro
+#
+# Tailscale is intentionally absent: inside WSL it needs userspace-networking
+# mode (--tun=userspace-networking) and usually runs on the Windows host
+# instead. Add it here if you really run tailscaled inside this distro.
+
+[bootstrap.apt.sources]
+ghostty = { ppa = "mkasberg/ghostty-ubuntu" }
+
+[bootstrap.packages]
+"apt:ghostty" = "latest"

@@ -1,0 +1,20 @@
+# Machine module: dotfiles (OFF by default, applied only when you say yes)
+# bootstrap.sh runs "mise -E <env>,dotfiles bootstrap --only dotfiles,tools
+# --prompt-vars" so this URL prompt shows the default repo; press Enter to
+# use it, or paste another repository URL to use that instead.
+#
+# The repo must exist on GitHub with at least one commit on `main` before
+# this module can apply. This module is separate so servers can skip it and
+# a failed dotfiles clone never blocks tool/package installs.
+
+[vars.dotfiles_url]
+default = "https://github.com/davichuder/dotfiles.git"
+prompt = "Dotfiles repository URL (Enter = default davichuder/dotfiles)"
+
+[bootstrap.repos]
+"~/dotfiles" = { url = "{{ vars.dotfiles_url }}", ref = "main" }
+
+# Example — one entry per file (adjust to your repo layout when it exists):
+# [dotfiles]
+# "~/.zshrc" = "~/dotfiles/zshrc"
+# "~/.config/ghostty/config" = "~/dotfiles/ghostty/config"

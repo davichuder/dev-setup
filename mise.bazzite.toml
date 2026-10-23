@@ -1,0 +1,14 @@
+# Machine module: bazzite (Fedora Atomic image)
+# Select with: mise -E bazzite bootstrap
+#
+# The base config still works: the brew: manager installs into
+# /home/linuxbrew/.linuxbrew. The host image already provides:
+#   - Docker/Podman: enable with `ujust setup-docker` if you use Docker Desktop-style flows
+#   - OpenSSH client
+#   - tailscale via `ujust install-tailscale` if you want it untracked
+#
+# Ghostty is layered with rpm-ostree through the community COPR (never dnf on
+# atomic images). Needs one reboot to activate. The hook is idempotent.
+
+[bootstrap.hooks]
+final = "bash scripts/install-ghostty-bazzite.sh"

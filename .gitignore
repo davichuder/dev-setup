@@ -1,0 +1,15 @@
+# Local machine state — never shared
+# miserc.local.toml: saved module selection / var answers
+miserc.local.toml
+# mise.local.toml: per-directory local mise overrides
+mise.local.toml
+# local harness state
+.atl/
+
+# Secrets or machine-specific env templates
+.env
+*.local
+
+# OS / editor noise
+.DS_Store
+Thumbs.db

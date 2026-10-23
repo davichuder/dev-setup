@@ -1,0 +1,27 @@
+# Machine module: server (Ubuntu Server, headless)
+# Select with: mise -E server bootstrap
+# No GUI applications. Docker Engine + Tailscale + SSH server + services.
+
+# Keys/fingerprints verified against vendor keys.
+[bootstrap.apt.sources]
+docker = { uris = "https://download.docker.com/linux/ubuntu", components = "stable", key = "https://download.docker.com/linux/ubuntu/gpg", fingerprint = "9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88" }
+tailscale = { uris = "https://pkgs.tailscale.com/stable/ubuntu", key = "https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg", fingerprint = "2596 A99E AAB3 3821 893C 0A79 458C A832 957F 5868" }
+
+[bootstrap.packages]
+"apt:docker-ce" = "latest"
+"apt:docker-ce-cli" = "latest"
+"apt:docker-compose-plugin" = "latest"
+"apt:tailscale" = "latest"
+"apt:openssh-server" = "latest"
+
+[bootstrap.services.docker]
+state = "running"
+enabled = true
+
+[bootstrap.services.tailscaled]
+state = "running"
+enabled = true
+
+[bootstrap.services.sshd]
+state = "running"
+enabled = true

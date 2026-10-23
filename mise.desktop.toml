@@ -1,0 +1,26 @@
+# Machine module: desktop (Ubuntu desktop)
+# Select with: mise -E desktop bootstrap
+# Adds: Ghostty (community PPA), Docker Engine, Tailscale + their services.
+
+# Repositories, added before apt: packages install. Keys/fingerprints were
+# verified against the vendor keys (docker.com gpg + pkgs.tailscale.com keyring).
+[bootstrap.apt.sources]
+ghostty = { ppa = "mkasberg/ghostty-ubuntu" }
+docker = { uris = "https://download.docker.com/linux/ubuntu", components = "stable", key = "https://download.docker.com/linux/ubuntu/gpg", fingerprint = "9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88" }
+tailscale = { uris = "https://pkgs.tailscale.com/stable/ubuntu", key = "https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg", fingerprint = "2596 A99E AAB3 3821 893C 0A79 458C A832 957F 5868" }
+
+[bootstrap.packages]
+"apt:ghostty" = "latest"
+"apt:docker-ce" = "latest"
+"apt:docker-ce-cli" = "latest"
+"apt:docker-compose-plugin" = "latest"
+"apt:tailscale" = "latest"
+
+# System services shipped by those packages
+[bootstrap.services.docker]
+state = "running"
+enabled = true
+
+[bootstrap.services.tailscaled]
+state = "running"
+enabled = true
