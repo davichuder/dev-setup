@@ -31,18 +31,7 @@ The module is auto-detected, in this order:
 
 Anything else prints a warning and cancels without changing anything.
 
-After it finishes: open a new shell (mise activation block is written into your shell startup files).
-
-The module is auto-detected, in this order:
-
-1. `/proc/version` mentions Microsoft → **wsl**
-2. a Fedora Atomic image with `ujust` (`ujust` in PATH or "bazzite" in os-release) → **bazzite**
-3. Ubuntu with a graphical session (`$XDG_SESSION_TYPE` x11/wayland, or `graphical.target` active) → **desktop**
-4. Ubuntu headless (tty/ssh session) → **server**
-
-Anything else prints a warning and cancels without changing anything.
-
-After it finishes: open a new shell (mise activation block is written into your shell startup files).
+After it finishes: open a new shell (mise activation block is written into your shell startup files). Tools then resolve in any directory too — the script links the repo as a global mise fragment (`~/.config/mise/conf.d/dev-setup`), because the base config alone only applies inside the checkout.
 
 ## Requirements
 

@@ -47,6 +47,14 @@ fi
 # Trust the project's mise configs (required once per machine)
 mise trust . >/dev/null 2>&1 || true
 
+# --- link the repo as a global mise fragment ---------------------------------
+# Shell shims (written below by mise bootstrap) resolve tool versions from the
+# GLOBAL config chain: the project mise.toml alone applies only inside this
+# directory, so outside it every shim would fail with "No version is set for
+# shim". A conf.d folder fragment makes the base config machine-wide.
+mkdir -p "$HOME/.config/mise/conf.d"
+ln -sfn "$PWD" "$HOME/.config/mise/conf.d/dev-setup"
+
 # --- 2) argument parsing ----------------------------------------------------
 FORCE_MODULE=""
 DOT_MODE=""    # "", "yes", "no"
@@ -120,6 +128,7 @@ esac
 # --- 4) main bootstrap (packages + tools + fonts, no dotfiles) ---------------
 echo "==> mise bootstrap (module: $SHELL_ENV, dotfiles skipped)"
 mise -E "$SHELL_ENV" bootstrap --yes
+mise reshim
 
 # --- 4) dotfiles: only if you say yes ---------------------------------------
 # In non-interactive runs the default answer is "no"; with --dotfiles the
