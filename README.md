@@ -31,7 +31,7 @@ The module is auto-detected, in this order:
 
 Anything else prints a warning and cancels without changing anything.
 
-After it finishes: open a new shell (mise activation block is written into your shell startup files). Tools then resolve in any directory too — the script links the repo as a global mise fragment (`~/.config/mise/conf.d/dev-setup`), because the base config alone only applies inside the checkout.
+After it finishes: open a new shell (mise activation block is written into your shell startup files). Tools then resolve in any directory too — the script writes the base `[tools]` table into a global mise fragment (`~/.config/mise/conf.d/dev-setup-tools.toml`), because the project config alone only applies inside the checkout.
 
 ## Requirements
 

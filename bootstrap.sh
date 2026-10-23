@@ -47,13 +47,16 @@ fi
 # Trust the project's mise configs (required once per machine)
 mise trust . >/dev/null 2>&1 || true
 
-# --- link the repo as a global mise fragment ---------------------------------
+# --- expose the tool set globally --------------------------------------------
 # Shell shims (written below by mise bootstrap) resolve tool versions from the
 # GLOBAL config chain: the project mise.toml alone applies only inside this
 # directory, so outside it every shim would fail with "No version is set for
-# shim". A conf.d folder fragment makes the base config machine-wide.
+# shim". mise.toml is generated ONCE into the global config as a tools-only
+# fragment (no tasks/dotfiles/bootstrap) — no duplicated config roots, so
+# relative task paths keep working everywhere.
 mkdir -p "$HOME/.config/mise/conf.d"
-ln -sfn "$PWD" "$HOME/.config/mise/conf.d/dev-setup"
+awk '/^\[tools\]/{f=1} f{print} f && $0 !~ /^\[tools\]/ && NR>1 && /^\[/{exit}' \
+  mise.toml > "$HOME/.config/mise/conf.d/dev-setup-tools.toml"
 
 # --- 2) argument parsing ----------------------------------------------------
 FORCE_MODULE=""
