@@ -6,6 +6,16 @@
 # Version policy: lts where the project ships an LTS, otherwise latest.
 # Secrets are never stored here — use [bootstrap.secrets] if you need templates.
 
+[tasks]
+lint.description = "Syntax check (bash -n) and ShellCheck every shell file in the repo"
+lint.run = """
+bash -n bootstrap.sh
+bash -n scripts/install-fonts.sh
+bash -n scripts/install-ghostty-bazzite.sh
+bash -n scripts/set-timezone-wsl.sh
+shellcheck -S warning bootstrap.sh scripts/*.sh
+"""
+
 [tools]
 # Language runtimes (mise core tools)
 node = "lts"

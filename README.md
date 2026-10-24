@@ -196,6 +196,7 @@ mise -E bazzite bootstrap --dry-run  # preview what would change
 mise bootstrap packages upgrade      # upgrade brew/apt formulae to latest
 mise bootstrap --update              # refresh metadata + declared repos
 mise bootstrap unapply dotfiles      # remove what the dotfiles module deployed
+mise run lint                        # syntax (bash -n) + shellcheck on every shell file
 ./bootstrap.sh --prune               # delete tool versions no config selects anymore
 ./bootstrap.sh --uninstall           # remove the whole setup (asks y/n)
 ```

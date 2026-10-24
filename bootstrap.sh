@@ -311,7 +311,7 @@ esac
 # exit code 0 = everything listed is applied; 1 = something differs.
 run_doctor() {
   local env_for_checks="$1"
-  local fails=0 row cur_shell want got
+  local fails=0 cur_shell want got
   local shell_is_zsh=0
   echo "==> doctor (read-only; nothing is changed)"
 
