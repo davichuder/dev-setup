@@ -129,7 +129,7 @@ zsh = true
 "~/.zshrc/fzf-hook" = { line = 'source <(fzf --zsh)' }
 "~/.zshrc/zoxide-init" = { line = 'eval "$(zoxide init zsh)"' }
 "~/.zshrc/carapace-completions" = { line = 'autoload -Uz compinit; compinit -C; source <(carapace _carapace)' }
-"~/.zshrc/thefuck-alias" = { line = 'eval "$(thefuck --alias fuck)"' }
+"~/.zshrc/thefuck-alias" = { line = 'fuck() { unfunction fuck 2>/dev/null; command -v thefuck >/dev/null 2>&1 || return; eval "$(thefuck --alias fuck)"; fuck "$@"; }' }
 "~/.zshrc/atuin-init" = { line = 'eval "$(atuin init zsh)"' }
 # autosuggestions before syntax-highlighting: the highlighter must load last
 "~/.zshrc/zsh-autosuggestions" = { line = 'source "/home/linuxbrew/.linuxbrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"' }
