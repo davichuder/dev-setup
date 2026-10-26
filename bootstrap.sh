@@ -247,17 +247,17 @@ run_uninstall() {
     echo "    skipped: no brew binary found in $brew_prefix/bin"
   fi
 
-  # 7) Nerd Fonts and their marker
+  # 7) Nerd Fonts and their markers
   echo "==> fonts"
-  for font in JetBrainsMono FiraCode Iosevka Hack Meslo CascadiaCode; do
+  for font in JetBrainsMono FiraCode Iosevka Hack Meslo CascadiaCode SymbolsNerdFont; do
     if [ -d "$HOME/.local/share/fonts/$font" ]; then
       rm -rf "$HOME/.local/share/fonts/$font"
       removed_fonts=$((removed_fonts + 1))
     fi
   done
-  rm -rf "$HOME/.local/share/fonts/.nerd-fonts-done"
+  rm -rf "$HOME/.local/share/fonts/.nerd-fonts-done" "$HOME/.local/share/fonts/.nerd-symbols-done"
   command -v fc-cache >/dev/null 2>&1 && fc-cache -f >/dev/null 2>&1 || true
-  echo "    removed $removed_fonts of the 6 Nerd Font directories"
+  echo "    removed $removed_fonts Nerd Font directories (core + Symbols)"
 
   # 8) what stays, and the exact command to remove it
   echo

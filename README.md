@@ -52,7 +52,7 @@ After it finishes: open a new shell (mise activation block is written into your 
 4. the global tools fragment (`~/.config/mise/conf.d/dev-setup-tools.toml`)
 5. every tool declared in `[tools]`
 6. every `brew:` formula declared in `[bootstrap.packages]` (`mise` itself is kept, it is the manager)
-7. the 6 Nerd Fonts and their marker
+7. the core Nerd Fonts + Symbols sidecar and both markers
 
 It then lists what it deliberately leaves alone, with the exact command for each: apt packages (`sudo apt-get remove …`), Bazzite's rpm-ostree Ghostty layer, your `~/dotfiles` checkout, and mise plus its data directory. Every step tolerates "already gone", so running it twice is safe. `--uninstall --yes` skips the confirmation, and in that mode the login shell is left unchanged (the revert command is printed instead), matching how non-interactive installs never change it.
 
@@ -64,7 +64,8 @@ It then lists what it deliberately leaves alone, with the exact command for each
 - **apt ≥ 2.4** (Ubuntu 22.04+/Debian 12+): mise writes inline-signed apt repository keys.
 - **A few GB free disk**: runtimes (node, python, go, rust, java) plus ~40 CLIs land in `~/.local/share/mise` and the brew prefix.
 - **Fonts**: installs the 6 core Nerd Fonts *plus* **Symbols Nerd Font** as a fallback.
-  Headless servers skip the font task automatically when `fc-cache` is missing.- **WSL2 + Docker**: install Docker Desktop on Windows and enable *Settings > Resources > WSL Integration > this distro* — the script reminds you at the end only when the Docker engine is not reachable from the distro.
+  Headless servers skip the font task automatically when `fc-cache` is missing.
+- **WSL2 + Docker**: install Docker Desktop on Windows and enable *Settings > Resources > WSL Integration > this distro* — the script reminds you at the end only when the Docker engine is not reachable from the distro.
 - **Network**: required on first run (bottles, runtimes, apt sources, fonts).
 
 ## Installation flow
@@ -184,7 +185,7 @@ No separate toolchain to install later — the setup lands the [LazyVim requirem
 - `neovim >= 0.11.2` (with LuaJIT) and `lazygit` from Homebrew, `git >= 2.19` and `curl` from the apt/brew steps
 - `ripgrep`, `fd`, `fzf` as tools `[tools]`
 - `tree-sitter` CLI as a tool, plus a C compiler (`build-essential` on Ubuntu/Bazzite: `gcc`/`pkgconf` via rpm-ostree or toolbx) for `nvim-treesitter` parser builds
-- the 6 Nerd Fonts installed by `scripts/install-fonts.sh` (v3+) and Ghostty as the terminal on Ubuntu (documented on the Bazzite module as a manual step with `rpm-ostree`)
+- the 6 core Nerd Fonts + Symbols sidecar installed by `scripts/install-fonts.sh` (v3+) and Ghostty as the terminal on Ubuntu (documented on the Bazzite module as a manual step with `rpm-ostree`)
 
 You only need to drop your LazyVim config (`~/.config/nvim`) on top of it; `:LazyHealth` should then pass without installing anything extra.
 
