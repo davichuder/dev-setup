@@ -63,8 +63,8 @@ It then lists what it deliberately leaves alone, with the exact command for each
 - **`sudo` rights**: apt sources/packages, rpm-ostree layering and system services run with sudo when a change needs root.
 - **apt ≥ 2.4** (Ubuntu 22.04+/Debian 12+): mise writes inline-signed apt repository keys.
 - **A few GB free disk**: runtimes (node, python, go, rust, java) plus ~40 CLIs land in `~/.local/share/mise` and the brew prefix.
-- **Fonts**: need fontconfig (`fc-cache`); headless servers skip the font task automatically.
-- **WSL2 + Docker**: install Docker Desktop on Windows and enable *Settings > Resources > WSL Integration > this distro* — the script reminds you at the end only when the Docker engine is not reachable from the distro.
+- **Fonts**: installs the 6 core Nerd Fonts *plus* **Symbols Nerd Font** as a fallback.
+  Headless servers skip the font task automatically when `fc-cache` is missing.- **WSL2 + Docker**: install Docker Desktop on Windows and enable *Settings > Resources > WSL Integration > this distro* — the script reminds you at the end only when the Docker engine is not reachable from the distro.
 - **Network**: required on first run (bottles, runtimes, apt sources, fonts).
 
 ## Installation flow
@@ -207,3 +207,4 @@ mise run lint                        # syntax (bash -n) + shellcheck on every sh
 - Bazzite: after the Ghostty layer, one reboot applies it.
 - `mise bootstrap` runs with `sudo` only where a change requires root (apt sources/packages, rpm-ostree); it never runs privileged work without a declared change.
 - WSL2 clock: the setup runs a `final` hook setting the distro timezone to `America/Argentina/Buenos_Aires` (UTC-3). WSL2 inherits a UTC clock from the Windows host, so this only converts display; if you want the host to follow it instead, set Windows' own timezone too. On a native Ubuntu install the zone stays untouched.
+- Icons missing in the terminal: fonts are installed — `fc-list | grep -i nerd` shows them — but the **terminal font-family must be a Nerd Font** (`MesloLGS Nerd Font`, `JetBrainsMono Nerd Font`, `CascadiaCode Nerd Font`). Ghostty: `font-family = MesloLGS Nerd Font`; WezTerm: `config.font = wezterm.font("MesloLGS Nerd Font")`; Alacritty: `font.family = "MesloLGSNerdFont"`. The extra `Symbols Nerd Font` helps editors/terminals that fall back to a symbols-only font.
