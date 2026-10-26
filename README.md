@@ -97,14 +97,14 @@ flowchart TD
 
 | File | Contains |
 |---|---|
-| `mise.toml` | Base for every machine: 5 runtimes + 39 CLIs (`[tools]`), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed; includes llama.cpp for local inference), bash and zsh shell activation, idempotent font task |
+| `mise.toml` | Base for every machine: 5 runtimes + 39 CLIs (`[tools]`), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed; includes llama.cpp and the zsh autosuggestions/syntax-highlighting plugins), bash and zsh shell activation, idempotent font task |
 | `mise.desktop.toml` | Ubuntu desktop: Ghostty (PPA), Docker Engine, Tailscale + services |
 | `mise.wsl.toml` | WSL2: Ghostty (PPA, WSLg); Docker comes from Docker Desktop on Windows; time zone set to America/Argentina/Buenos Aires (UTC-3) |
 | `mise.bazzite.toml` | Bazzite: Ghostty via COPR + `rpm-ostree`; Docker/SSH already in the image |
 | `mise.server.toml` | Ubuntu Server: Docker Engine, Tailscale, `openssh-server` + services |
 | `mise.dotfiles.toml` | Optional module: clones `github.com/davichuder/dotfiles` into `~/dotfiles` and links files; only applied when you accept |
 | `bootstrap.sh` | Installs mise if missing, picks the module, runs `mise bootstrap`, optional dotfiles step, WSL2 Docker Desktop reminder |
-| `scripts/install-fonts.sh` | 6 core Nerd Fonts → `~/.local/share/fonts` (idempotent) |
+| `scripts/install-fonts.sh` | 6 core Nerd Fonts + Symbols sidecar → `~/.local/share/fonts` (idempotent) |
 | `scripts/install-ghostty-bazzite.sh` | COPR + `rpm-ostree` layering for Ghostty (idempotent) |
 
 ## Dotfiles — example structure and sync

@@ -105,6 +105,8 @@ lazydocker = "latest"
 "brew:rsync" = "latest"
 "brew:htop" = "latest"
 "brew:powerlevel10k" = "latest"
+"brew:zsh-autosuggestions" = "latest"
+"brew:zsh-syntax-highlighting" = "latest"
 "brew:thefuck" = "latest"   # pypi backend is broken on python 3.13 (distutils gone)
 "brew:llama.cpp" = "latest" # provides llama-cli/llama-server and the quantize helpers
 
@@ -129,6 +131,9 @@ zsh = true
 "~/.zshrc/carapace-completions" = { line = 'autoload -Uz compinit; compinit -C; source <(carapace _carapace)' }
 "~/.zshrc/thefuck-alias" = { line = 'eval "$(thefuck --alias fuck)"' }
 "~/.zshrc/atuin-init" = { line = 'eval "$(atuin init zsh)"' }
+# autosuggestions before syntax-highlighting: the highlighter must load last
+"~/.zshrc/zsh-autosuggestions" = { line = 'source "/home/linuxbrew/.linuxbrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"' }
+"~/.zshrc/zsh-syntax-highlighting" = { line = 'source "/home/linuxbrew/.linuxbrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"' }
 
 # Run idempotently on every bootstrap: the 6 core Nerd Fonts
 [tasks.bootstrap]
