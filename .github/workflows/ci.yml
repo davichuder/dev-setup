@@ -19,7 +19,8 @@ jobs:
         uses: jdx/mise-action@v5
         with:
           install: true
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Trust the repo config
         run: mise trust .
 
