@@ -81,7 +81,7 @@ tealdeer = "latest"
 "pypi:httpie" = "latest"
 
 # Coding agents & ecosystem
-opencode = "latest"
+opencode = { version = "latest", allow_low_downloads = true }
 pi = "latest"
 "npm:gentle-pi" = "latest"   # gentle-shell; npm package name is gentle-pi until migration
 gentle-ai = "latest"
@@ -130,7 +130,7 @@ zsh = true
 "~/.zshrc/fzf-hook" = { line = 'source <(fzf --zsh)' }
 "~/.zshrc/zoxide-init" = { line = 'eval "$(zoxide init zsh)"' }
 "~/.zshrc/carapace-completions" = { line = 'autoload -Uz compinit; compinit -C; source <(carapace _carapace)' }
-"~/.zshrc/pay-respects-alias" = { line = 'f() { (( _PR_LOADED )) || { _PR_LOADED=1; eval "$(pay-respects zsh)"; }; f "$@"; }; command_not_found_handler() { (( _PR_LOADED )) || { _PR_LOADED=1; eval "$(pay-respects zsh)"; }; command_not_found_handler "$@"; }' }
+"~/.zshrc/pay-respects-alias" = { line = '_pr_stub() { (( ${+_PR_LOADED} )) || { typeset -g _PR_LOADED=1; eval "$(pay-respects zsh)"; }; f "$@"; }; unalias f 2>/dev/null; alias f=_pr_stub; command_not_found_handler() { (( ${+_PR_LOADED} )) || { typeset -g _PR_LOADED=1; eval "$(pay-respects zsh)"; }; command_not_found_handler "$@"; }' }
 "~/.zshrc/pay-respects-fuck-compat" = { line = 'alias fuck=f' }  # keep the old muscle memory
 "~/.zshrc/atuin-init" = { line = 'eval "$(atuin init zsh)"' }
 # autosuggestions before syntax-highlighting: the highlighter must load last
