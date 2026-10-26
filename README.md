@@ -98,7 +98,7 @@ flowchart TD
 
 | File | Contains |
 |---|---|
-| `mise.toml` | Base for every machine: 5 runtimes + 39 CLIs (`[tools]`), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed; includes llama.cpp and the zsh autosuggestions/syntax-highlighting plugins), bash and zsh shell activation, idempotent font task |
+| `mise.toml` | Base for every machine: 5 runtimes + 40 CLIs (`[tools]`), Homebrew formulae (`brew:` — mise installs bottles, no Homebrew needed; includes llama.cpp and the zsh autosuggestions/syntax-highlighting plugins), bash and zsh shell activation, idempotent font task |
 | `mise.desktop.toml` | Ubuntu desktop: Ghostty (PPA), Docker Engine, Tailscale + services |
 | `mise.wsl.toml` | WSL2: Ghostty (PPA, WSLg); Docker comes from Docker Desktop on Windows; time zone set to America/Argentina/Buenos Aires (UTC-3) |
 | `mise.bazzite.toml` | Bazzite: Ghostty via COPR + `rpm-ostree`; Docker/SSH already in the image |

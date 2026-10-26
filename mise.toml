@@ -63,6 +63,8 @@ zoxide = "latest"
 carapace = "latest"
 navi = "latest"
 atuin = "latest"
+# Command correction (pay-respects replaces thefuck; sub-ms, TOML rules)
+"aqua:iffse/pay-respects" = "latest"
 
 # Quality / policy for the shell scripts in this repo (and any other shell code)
 shellcheck = "latest"
@@ -107,7 +109,6 @@ lazydocker = "latest"
 "brew:powerlevel10k" = "latest"
 "brew:zsh-autosuggestions" = "latest"
 "brew:zsh-syntax-highlighting" = "latest"
-"brew:thefuck" = "latest"   # pypi backend is broken on python 3.13 (distutils gone)
 "brew:llama.cpp" = "latest" # provides llama-cli/llama-server and the quantize helpers
 
 # Activate mise in the login shell
@@ -119,7 +120,7 @@ zsh = true
 # mise.run install in ~/.local/bin needs PATH set in ~/.zshenv (zsh reads it first).
 # mise bootstrap applies [dotfiles] BEFORE shell activation, so one run does both.
 # These shell hooks are the difference between "binary installed" and "tool works":
-# zoxide/carapace/fzf/thefuck need init lines, powerlevel10k needs its theme source
+# zoxide/carapace/fzf/pay-respects need init lines, powerlevel10k needs its theme source
 # (the brew prefix path is constant across every machine this repo provisions).
 [dotfiles]
 "~/.zshenv/mise-local-bin" = { line = 'export PATH="$HOME/.local/bin:$PATH"' }
@@ -129,7 +130,8 @@ zsh = true
 "~/.zshrc/fzf-hook" = { line = 'source <(fzf --zsh)' }
 "~/.zshrc/zoxide-init" = { line = 'eval "$(zoxide init zsh)"' }
 "~/.zshrc/carapace-completions" = { line = 'autoload -Uz compinit; compinit -C; source <(carapace _carapace)' }
-"~/.zshrc/thefuck-alias" = { line = 'fuck() { unfunction fuck 2>/dev/null; command -v thefuck >/dev/null 2>&1 || return; eval "$(thefuck --alias fuck)"; fuck "$@"; }' }
+"~/.zshrc/pay-respects-alias" = { line = 'f() { (( _PR_LOADED )) || { _PR_LOADED=1; eval "$(pay-respects zsh)"; }; f "$@"; }; command_not_found_handler() { (( _PR_LOADED )) || { _PR_LOADED=1; eval "$(pay-respects zsh)"; }; command_not_found_handler "$@"; }' }
+"~/.zshrc/pay-respects-fuck-compat" = { line = 'alias fuck=f' }  # keep the old muscle memory
 "~/.zshrc/atuin-init" = { line = 'eval "$(atuin init zsh)"' }
 # autosuggestions before syntax-highlighting: the highlighter must load last
 "~/.zshrc/zsh-autosuggestions" = { line = 'source "/home/linuxbrew/.linuxbrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"' }
