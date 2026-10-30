@@ -20,6 +20,10 @@ tailscale = { uris = "https://pkgs.tailscale.com/stable/ubuntu", key = "https://
 "apt:build-essential" = "latest"
 "apt:pkg-config" = "latest"
 "apt:libssl-dev" = "latest"
+# system libs required by Puppeteer/Mermaid headless Chromium
+"apt:libnspr4" = "latest"
+"apt:libnss3" = "latest"
+"apt:libasound2t64" = "latest"
 
 # System services shipped by those packages
 [bootstrap.services.docker]
